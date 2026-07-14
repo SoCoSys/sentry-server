@@ -9,7 +9,7 @@ COPY . .
 # alongside the submodule gitlink when rebasing on upstream.
 ARG HBB_COMMON_REF=83419b6549636ee39dacef7776c473f5802e08d6
 RUN rm -rf libs/hbb_common && \
-    git clone --quiet https://github.com/rustdesk/hbb_common libs/hbb_common && \
+    git clone --quiet https://github.com/SoCoSys/hbb_common libs/hbb_common && \
     git -C libs/hbb_common checkout --quiet ${HBB_COMMON_REF}
 RUN cargo build --release --all-features \
       --bin hbbs --bin hbbr \
