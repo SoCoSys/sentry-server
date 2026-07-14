@@ -1,0 +1,15 @@
+# SoCo Sentry relay (hbbs/hbbr) — static musl build, drop-in replacement for
+# the classic rustdesk/rustdesk-server image (same /usr/bin/hbbs + /usr/bin/hbbr
+# layout; the compose supplies the command). Adds the ID blocklist poller.
+FROM clux/muslrust:stable AS builder
+WORKDIR /volume
+COPY . .
+RUN cargo build --release --all-features \
+      --bin hbbs --bin hbbr \
+      --target x86_64-unknown-linux-musl
+
+FROM scratch
+COPY --from=builder /volume/target/x86_64-unknown-linux-musl/release/hbbs /usr/bin/hbbs
+COPY --from=builder /volume/target/x86_64-unknown-linux-musl/release/hbbr /usr/bin/hbbr
+WORKDIR /root
+ENV HOME=/root
