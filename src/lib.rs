@@ -1,5 +1,5 @@
 mod rendezvous_server;
-mod soco_blocklist;
+mod soco_allowlist;
 pub use rendezvous_server::*;
 pub mod common;
 mod database;

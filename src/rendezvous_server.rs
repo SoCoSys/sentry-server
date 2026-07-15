@@ -100,8 +100,8 @@ enum LoopFailure {
 impl RendezvousServer {
     #[tokio::main(flavor = "multi_thread")]
     pub async fn start(port: i32, serial: i32, key: &str, rmem: usize) -> ResultType<()> {
-        // SoCo Sentry: start the device-blocklist poller (no-op unless configured).
-        crate::soco_blocklist::start();
+        // SoCo Sentry: start the allowlist file watcher (default-deny).
+        crate::soco_allowlist::start();
         let (key, sk) = Self::get_server_sk(key);
         let nat_port = port - 1;
         let ws_port = port + 2;
@@ -349,9 +349,9 @@ impl RendezvousServer {
                     let ip = addr.ip().to_string();
                     if id.len() < 6 {
                         return send_rk_res(socket, addr, UUID_MISMATCH).await;
-                    } else if crate::soco_blocklist::is_blocked(&id) {
-                        // SoCo Sentry: blocked device may not register/come online.
-                        log::info!("Rejected registration of blocked id {}", id);
+                    } else if crate::soco_allowlist::is_denied(&id) {
+                        // SoCo Sentry default-deny: only allowed devices may register.
+                        log::info!("Denied registration of not-allowed id {}", id);
                         return send_rk_res(socket, addr, UUID_MISMATCH).await;
                     } else if !self.check_ip_blocker(&ip, &id).await {
                         return send_rk_res(socket, addr, TOO_FREQUENT).await;
@@ -695,9 +695,9 @@ impl RendezvousServer {
             return Ok((msg_out, None));
         }
         let id = ph.id;
-        // SoCo Sentry: refuse connections to a blocked device (report as non-existent).
-        if crate::soco_blocklist::is_blocked(&id) {
-            log::info!("Rejected punch-hole to blocked id {}", id);
+        // SoCo Sentry default-deny: refuse connections to a not-allowed device.
+        if crate::soco_allowlist::is_denied(&id) {
+            log::info!("Denied punch-hole to not-allowed id {}", id);
             let mut msg_out = RendezvousMessage::new();
             msg_out.set_punch_hole_response(PunchHoleResponse {
                 failure: punch_hole_response::Failure::ID_NOT_EXIST.into(),
