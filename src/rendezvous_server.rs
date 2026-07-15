@@ -13,7 +13,7 @@ use hbb_common::{
     log,
     protobuf::{Message as _, MessageField},
     rendezvous_proto::{
-        register_pk_response::Result::{TOO_FREQUENT, UUID_MISMATCH},
+        register_pk_response::Result::{NOT_DEPLOYED, TOO_FREQUENT, UUID_MISMATCH},
         *,
     },
     tcp::{listen_any, FramedStream},
@@ -351,8 +351,10 @@ impl RendezvousServer {
                         return send_rk_res(socket, addr, UUID_MISMATCH).await;
                     } else if crate::soco_allowlist::is_denied(&id) {
                         // SoCo Sentry default-deny: only allowed devices may register.
+                        // Use NOT_DEPLOYED (not UUID_MISMATCH) so the client keeps its
+                        // stable id and stops instead of regenerating ids and cycling.
                         log::info!("Denied registration of not-allowed id {}", id);
-                        return send_rk_res(socket, addr, UUID_MISMATCH).await;
+                        return send_rk_res(socket, addr, NOT_DEPLOYED).await;
                     } else if !self.check_ip_blocker(&ip, &id).await {
                         return send_rk_res(socket, addr, TOO_FREQUENT).await;
                     }
