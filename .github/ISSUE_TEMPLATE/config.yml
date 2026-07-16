@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: SoCo Systems Sentry
+    url: https://sentry.socosystems.net
+    about: This is an internal Southern Colorado Systems project. Authorized clients — please contact us directly rather than opening an issue.
