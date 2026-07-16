@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="docs/sentry-shield.png" alt="SoCo Systems Sentry" width="112"><br><br>
+  <b>Secure remote support by Southern Colorado Systems, LLC</b>
+</p>
+
 # SoCo Systems Sentry — Relay Server
 
 The relay server behind **[SoCo Systems Sentry](https://sentry.socosystems.net)**,
