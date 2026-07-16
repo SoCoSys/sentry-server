@@ -1,35 +1,50 @@
-# RustDesk Server Program
+# SoCo Systems Sentry — Relay Server
 
-[![build](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml/badge.svg)](https://github.com/rustdesk/rustdesk-server/actions/workflows/build.yaml)
+The relay server behind **[SoCo Systems Sentry](https://sentry.socosystems.net)**,
+the branded remote-support tool used by **Southern Colorado Systems, LLC**. It is
+a fork of [rustdesk-server](https://github.com/rustdesk/rustdesk-server) — the
+`hbbs` rendezvous/ID server and `hbbr` relay — with a **default-deny device
+authorization** layer added.
 
-[**Download**](https://github.com/rustdesk/rustdesk-server/releases)
+> [!IMPORTANT]
+> **Authorized use only.** This server and the service it powers are operated
+> solely for Southern Colorado Systems and its authorized clients. Unauthorized
+> use, access, or distribution is prohibited. This repository is published for
+> source transparency and AGPL-3.0 license compliance.
 
-[**Manual**](https://rustdesk.com/docs/en/self-host/)
+## What this fork adds
 
-[**FAQ**](https://github.com/rustdesk/rustdesk/wiki/FAQ)
+- **Blocked by default (zero-trust).** `hbbs` consults an allowlist and refuses
+  registration and connection for any device that has not been explicitly
+  authorized in SoCo Systems' management console. A device that merely runs a
+  Sentry client cannot come online or be reached until it is enabled.
+- **Fail-safe by design.** The enforcement layer is written so that neither an
+  outage of the management side nor a relay restart can silently open the fleet
+  up or lock authorized devices out — the last known authorization set is kept.
+- **Drop-in image.** Published as `ghcr.io/socosys/sentry-server`, a direct
+  replacement for the stock `rustdesk/rustdesk-server` image (`hbbs` + `hbbr`),
+  built statically from `Dockerfile.soco`. The added logic lives in an isolated
+  module to keep upstream rebases clean.
 
-[**How to migrate OSS to Pro**](https://rustdesk.com/docs/en/self-host/rustdesk-server-pro/installscript/#convert-from-open-source)
+Key enforcement is preserved from upstream (clients validate the server by its
+public key), so switching the image in or out requires no client re-keying.
 
-Self-host your own RustDesk server, it is free and open source.
+## Building
 
-## How to build manually
+The container image is built and published to GHCR by CI on a version tag.
+For a local build, standard Rust tooling applies:
 
 ```bash
 cargo build --release
 ```
 
-Three executables will be generated in target/release.
+which produces `hbbs`, `hbbr`, and `rustdesk-utils` in `target/release`, exactly
+as upstream.
 
-- hbbs - RustDesk ID/Rendezvous server
-- hbbr - RustDesk relay server
-- rustdesk-utils - RustDesk CLI utilities
+## License & attribution
 
-You can find updated binaries on the [Releases](https://github.com/rustdesk/rustdesk-server/releases) page.
-
-If you want extra features, [RustDesk Server Pro](https://rustdesk.com/pricing.html) might suit you better.
-
-If you want to develop your own server, [rustdesk-server-demo](https://github.com/rustdesk/rustdesk-server-demo) might be a better and simpler start for you than this repo.
-
-## Installation
-
-Please follow this [doc](https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/)
+This project is a derivative work of
+**[rustdesk-server](https://github.com/rustdesk/rustdesk-server)** and is
+distributed under the **GNU AGPL-3.0** license, the same license as the upstream
+project. All RustDesk trademarks and copyrights remain with their respective
+owners; "SoCo Systems Sentry" branding belongs to Southern Colorado Systems, LLC.
